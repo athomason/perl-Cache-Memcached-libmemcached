@@ -1,0 +1,27 @@
+---
+abstract: 'Perl Interface to libmemcached'
+author:
+  - 'Copyright (c) 2008 Daisuke Maki <daisuke@endeworks.jp>'
+build_requires:
+  Test::More: 0.8
+distribution_type: module
+generated_by: 'Module::Install version 0.80'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Cache-Memcached-libmemcached
+no_index:
+  directory:
+    - inc
+    - t
+recommends:
+  Compress::Zlib: 0
+requires:
+  Carp: 0
+  Memcached::libmemcached: 0.2101
+  Storable: 0
+  Task::Weaken: 0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.02009
