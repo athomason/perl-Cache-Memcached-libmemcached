@@ -1,5 +1,5 @@
 use strict;
-use Test::More (tests => 18);
+use Test::More (tests => 16);
 
 use_ok("Cache::Memcached::libmemcached");
 can_ok("Cache::Memcached::libmemcached", (
@@ -13,16 +13,11 @@ Test::More::can_ok(__PACKAGE__,
     qw( MEMCACHED_DEFAULT_PORT MEMCACHED_DEFAULT_TIMEOUT MEMCACHED_MAX_BUFFER MEMCACHED_MAX_HOST_LENGTH MEMCACHED_MAX_KEY MEMCACHED_STRIDE MEMCACHED_VERSION_STRING_LENGTH ) );
 
 package DummyTwo;
-Test::More::use_ok("Cache::Memcached::libmemcached", ":memcached_allocated");
-Test::More::can_ok(__PACKAGE__,
-    qw( MEMCACHED_ALLOCATED MEMCACHED_NOT_ALLOCATED MEMCACHED_USED ));
-
-package DummyThree;
 Test::More::use_ok("Cache::Memcached::libmemcached", ":memcached_behavior");
 Test::More::can_ok(__PACKAGE__,
     qw( MEMCACHED_BEHAVIOR_BUFFER_REQUESTS MEMCACHED_BEHAVIOR_CACHE_LOOKUPS MEMCACHED_BEHAVIOR_CONNECT_TIMEOUT MEMCACHED_BEHAVIOR_DISTRIBUTION MEMCACHED_BEHAVIOR_HASH MEMCACHED_BEHAVIOR_KETAMA MEMCACHED_BEHAVIOR_NO_BLOCK MEMCACHED_BEHAVIOR_POLL_TIMEOUT MEMCACHED_BEHAVIOR_SOCKET_RECV_SIZE MEMCACHED_BEHAVIOR_SOCKET_SEND_SIZE MEMCACHED_BEHAVIOR_SORT_HOSTS MEMCACHED_BEHAVIOR_SUPPORT_CAS MEMCACHED_BEHAVIOR_TCP_NODELAY MEMCACHED_BEHAVIOR_VERIFY_KEY) );
 
-package DummyFour;
+package DummyThree;
 Test::More::use_ok("Cache::Memcached::libmemcached", ":memcached_callback");
 Test::More::can_ok(__PACKAGE__,
     qw(
@@ -35,7 +30,7 @@ Test::More::can_ok(__PACKAGE__,
     )
 );
 
-package DummyFive;
+package DummyFour;
 Test::More::use_ok("Cache::Memcached::libmemcached", ":memcached_connection");
 Test::More::can_ok(__PACKAGE__,
     qw(
@@ -46,7 +41,7 @@ Test::More::can_ok(__PACKAGE__,
     )
 );
 
-package DummySix;
+package DummyFive;
 Test::More::use_ok("Cache::Memcached::libmemcached", ":memcached_hash");
 Test::More::can_ok(__PACKAGE__,
     qw(
@@ -61,7 +56,7 @@ Test::More::can_ok(__PACKAGE__,
     )
 );
 
-package DummySeven;
+package DummySix;
 Test::More::use_ok("Cache::Memcached::libmemcached", ":memcached_return");
 Test::More::can_ok(__PACKAGE__,
     qw(
@@ -102,7 +97,7 @@ Test::More::can_ok(__PACKAGE__,
     )
 );
 
-package DummyEight;
+package DummySeven;
 Test::More::use_ok("Cache::Memcached::libmemcached", ":memcached_server_distribution");
 Test::More::can_ok(__PACKAGE__,
     qw(
