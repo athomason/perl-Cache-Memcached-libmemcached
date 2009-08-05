@@ -11,7 +11,7 @@ use Carp qw(croak);
 use Scalar::Util qw(weaken);
 use Storable ();
 
-our $VERSION = '0.02009';
+our $VERSION = '0.03001';
 
 use constant HAVE_ZLIB    => eval { require Compress::Zlib } && !$@;
 use constant F_STORABLE   => 1;
@@ -214,11 +214,34 @@ sub decr
 
 sub get_multi {
     my $self = shift;
+    my @keys = @_;
 
     my $namespace = $self->{namespace};
-    my @keys = $namespace ? map { "$namespace$_" } @_ : @_;
-    my $hash = $self->SUPER::get_multi(@keys);
-    return $namespace ? +{ map { ($_ => $hash->{"$namespace$_"}) } @_ } : $hash;
+
+    my $batch = $self->SUPER::memcached_batch_create_sized(scalar @keys);
+    for my $key (@keys) {
+        if (ref $key) {
+            Memcached::libmemcached::memcached_batch_get_by_key($batch,
+                ($namespace ? $namespace . $key->[1] : $key->[1]), $key->[0]);
+        }
+        else {
+            Memcached::libmemcached::memcached_batch_get($batch,
+                ($namespace ? $namespace . $key : $key));
+        }
+    }
+
+    $self->SUPER::memcached_mget_batch($batch);
+    Memcached::libmemcached::memcached_batch_free($batch);
+
+    my ($key, $value, %result);
+    while (1) {
+        my ($flags, $rc);
+        my $value = $self->SUPER::memcached_fetch($key, $flags, $rc);
+        last unless length $key;
+        substr $key, 0, length $namespace, '' if $namespace;
+        $result{$key} = $value;
+    }
+    return \%result;
 }
 
 sub flush_all
