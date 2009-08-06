@@ -214,34 +214,20 @@ sub decr
 
 sub get_multi {
     my $self = shift;
-    my @keys = @_;
 
-    my $namespace = $self->{namespace};
-
-    my $batch = $self->SUPER::memcached_batch_create_sized(scalar @keys);
-    for my $key (@keys) {
-        if (ref $key) {
-            Memcached::libmemcached::memcached_batch_get_by_key($batch,
-                ($namespace ? $namespace . $key->[1] : $key->[1]), $key->[0]);
+    if (my $ns = $self->{namespace}) {
+        my $ret = $self->SUPER::get_multi(map { $ns . $_ } @_);
+        my %r;
+        for my $key (keys %$ret) {
+            my $k = $key;
+            substr $k, 0, length $ns, '';
+            $r{$k} = $ret->{$key};
         }
-        else {
-            Memcached::libmemcached::memcached_batch_get($batch,
-                ($namespace ? $namespace . $key : $key));
-        }
+        return \%r;
     }
-
-    $self->SUPER::memcached_mget_batch($batch);
-    Memcached::libmemcached::memcached_batch_free($batch);
-
-    my ($key, $value, %result);
-    while (1) {
-        my ($flags, $rc);
-        my $value = $self->SUPER::memcached_fetch($key, $flags, $rc);
-        last unless length $key;
-        substr $key, 0, length $namespace, '' if $namespace;
-        $result{$key} = $value;
+    else {
+        return $self->SUPER::get_multi(@_)
     }
-    return \%result;
 }
 
 sub flush_all
