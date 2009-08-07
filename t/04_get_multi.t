@@ -6,7 +6,7 @@ BEGIN
     if (! $ENV{ MEMCACHED_SERVER } ) {
         plan(skip_all => "Define MEMCACHED_SERVER (e.g. localhost:11211) to run this test");
     } else {
-        plan(tests => 10);
+        plan(tests => 11);
     }
     use_ok("Cache::Memcached::libmemcached");
 }
@@ -49,7 +49,7 @@ TODO: {
         servers => [ $ENV{ MEMCACHED_SERVER } ],
         namespace => "t$$"
     } );
-    isa_ok($cache, "Cache::Memcached::libmemcached");
+    isa_ok($cache2, "Cache::Memcached::libmemcached");
     
     my @keys = ('A' .. 'Z');
     foreach my $key (@keys) {
@@ -62,4 +62,11 @@ TODO: {
 
     my %expected = map { ($_ => $_) } @keys;
     is_deeply( $h, \%expected, "got all the expected values");
+
+    my $master_key = 'dummy_master';
+    $cache2->set([ $master_key, $_ ], $_) for @keys;
+    my @k = map {[ $master_key, $_ ]} @keys;
+    my $got = $cache2->get_multi(@k);
+    %expected = map { $_ => $_ } @keys;
+    is_deeply( $got, \%expected, "get_multi with master key" );
 }

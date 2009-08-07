@@ -216,7 +216,7 @@ sub get_multi {
     my $self = shift;
 
     if (my $ns = $self->{namespace}) {
-        my $ret = $self->SUPER::get_multi(map { $ns . $_ } @_);
+        my $ret = $self->SUPER::get_multi(map { ref $_ ? [$_->[0], $ns . $_->[1]] : $ns . $_ } @_);
         my %r;
         for my $key (keys %$ret) {
             my $k = $key;
