@@ -6,7 +6,7 @@ BEGIN
     if (! $ENV{ MEMCACHED_SERVER } ) {
         plan(skip_all => "Define MEMCACHED_SERVER (e.g. localhost:11211) to run this test");
     } else {
-        plan(tests => 25);
+        plan(tests => 26);
     }
     use_ok("Cache::Memcached::libmemcached");
 }
@@ -98,5 +98,10 @@ SKIP: {
     my $key        = 'foo_with_master';
     $cache->set([ $master_key, $key ], 100);
     is( $cache->get([ $master_key, $key ]), 100, "get with master key" );
+
+    my $master_key2 = 'dummy_master2';
+    my $key2        = 'foo_with_master';
+    $cache->set([ $master_key2, $key2 ], 200);
+    is_deeply( $cache->get_multi([ $master_key, $key ], [ $master_key2, $key2 ]), {$key => 100, $key2 => 200}, , "get_multi with master key" );
 }
 
