@@ -11,7 +11,7 @@ use Carp qw(croak);
 use Scalar::Util qw(weaken);
 use Storable ();
 
-our $VERSION = '0.03401';
+our $VERSION = '0.03402';
 
 use constant HAVE_ZLIB    => eval { require Compress::Zlib } && !$@;
 use constant F_STORABLE   => 1;
@@ -191,8 +191,13 @@ sub incr
     my $self = shift;
     my $key  = shift;
     my $offset = shift || 1;
-    if ($self->{namespace}) {
-        $key = "$self->{namespace}$key";
+    if (my $ns = $self->{namespace}) {
+        if (ref $key) {
+            $key = [$key->[0], $ns . $key->[1]];
+        }
+        else {
+            $key = $ns . $key;
+        }
     }
     my $val = 0;
     $self->memcached_increment($key, $offset, $val);
@@ -204,8 +209,13 @@ sub decr
     my $self = shift;
     my $key  = shift;
     my $offset = shift || 1;
-    if ($self->{namespace}) {
-        $key = "$self->{namespace}$key";
+    if (my $ns = $self->{namespace}) {
+        if (ref $key) {
+            $key = [$key->[0], $ns . $key->[1]];
+        }
+        else {
+            $key = $ns . $key;
+        }
     }
     my $val = 0;
     $self->memcached_decrement($key, $offset, $val);
