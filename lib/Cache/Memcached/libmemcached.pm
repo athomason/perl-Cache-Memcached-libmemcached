@@ -11,7 +11,7 @@ use Carp qw(croak);
 use Scalar::Util qw(weaken);
 use Storable ();
 
-our $VERSION = '0.03402';
+our $VERSION = '0.03403';
 
 use constant HAVE_ZLIB    => eval { require Compress::Zlib } && !$@;
 use constant F_STORABLE   => 1;
@@ -42,9 +42,6 @@ BEGIN
                 sub $method {
                     my \$self = shift;
                     my \$key  = shift;
-                    if (\$self->{namespace}) {
-                        \$key = "\$self->{namespace}\$key";
-                    }
                     \$self->SUPER::memcached_${method}(\$key, \@_)
                 }
             EOSUB
@@ -65,9 +62,6 @@ BEGIN
                         (\$master_key, \$key) = @\$key;
                     }
 
-                    if (\$self->{namespace}) {
-                        \$key = "\$self->{namespace}\$key";
-                    }
                     if (\$master_key) {
                         \$self->SUPER::memcached_${method}_by_key(\$master_key, \$key, \@_);
                     } else {
@@ -114,7 +108,9 @@ sub new
     $self->set_hashing_algorithm( $args->{hashing_algorithm} ) if exists $args->{hashing_algorithm};
     $self->set_distribution_method( $args->{distribution_method} ) if exists $args->{distribution_method};
 
-    $self->{namespace} = $args->{namespace} || '';
+    if (defined $args->{namespace}) {
+        $self->memcached_prefix_set($args->{namespace});
+    }
 
     return $self;
 }
@@ -191,14 +187,6 @@ sub incr
     my $self = shift;
     my $key  = shift;
     my $offset = shift || 1;
-    if (my $ns = $self->{namespace}) {
-        if (ref $key) {
-            $key = [$key->[0], $ns . $key->[1]];
-        }
-        else {
-            $key = $ns . $key;
-        }
-    }
     my $val = 0;
     $self->memcached_increment($key, $offset, $val);
     return $val;
@@ -209,35 +197,9 @@ sub decr
     my $self = shift;
     my $key  = shift;
     my $offset = shift || 1;
-    if (my $ns = $self->{namespace}) {
-        if (ref $key) {
-            $key = [$key->[0], $ns . $key->[1]];
-        }
-        else {
-            $key = $ns . $key;
-        }
-    }
     my $val = 0;
     $self->memcached_decrement($key, $offset, $val);
     return $val;
-}
-
-sub get_multi {
-    my $self = shift;
-
-    if (my $ns = $self->{namespace}) {
-        my $ret = $self->SUPER::get_multi(map { ref $_ ? [$_->[0], $ns . $_->[1]] : $ns . $_ } @_);
-        my %r;
-        for my $key (keys %$ret) {
-            my $k = $key;
-            substr $k, 0, length $ns, '';
-            $r{$k} = $ret->{$key};
-        }
-        return \%r;
-    }
-    else {
-        return $self->SUPER::get_multi(@_)
-    }
 }
 
 sub flush_all
